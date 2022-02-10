@@ -176,6 +176,17 @@ namespace AK
             level = previousLevel;
         }
 
+        void Logger::logAssert(const char* text, ...) 
+        {
+            WarningLevel previousLevel = level;
+            setLevel(WarningLevel::LEVEL_ASSERT);
+            va_list args;
+            va_start(args, text);
+            log(text, args);
+            va_end(args);
+            level = previousLevel;
+        }
+
         void Logger::setLevel(WarningLevel _level) 
         {
             level = _level;
@@ -240,6 +251,11 @@ namespace AK
                             case 'l':
                             {
                                 printLevel();
+                                break;
+                            }
+                            case 'm':
+                            {
+                                printf("utf-8");
                                 break;
                             }
                             case 's':
@@ -321,6 +337,11 @@ namespace AK
                             case 'l':
                             {
                                 printLevel();
+                                break;
+                            }
+                            case 'm':
+                            {
+                                printf("utf-8");
                                 break;
                             }
                             case 's':
@@ -447,6 +468,17 @@ namespace AK
             va_end(args);
             level = previousLevel;
         }
+
+        void Logger::logAssertW(const wchar_t* text, ...)
+        {
+            WarningLevel previousLevel = level;
+            setLevel(WarningLevel::LEVEL_ASSERT);
+            va_list args;
+            va_start(args, text);
+            logW(text, args);
+            va_end(args);
+            level = previousLevel;
+        }
         
         void Logger::printFmtW(const wchar_t* fmt, const wchar_t* text, ...)
         {
@@ -508,6 +540,10 @@ namespace AK
                             {
                                 printLevelW();
                                 break;
+                            }
+                            case L'm':
+                            {
+                                wprintf(L"utf-16");
                             }
                             case L's':
                             {
@@ -590,6 +626,11 @@ namespace AK
                                 printLevelW();
                                 break;
                             }
+                            case L'm':
+                            {
+                                wprintf(L"utf-16");
+                                break;
+                            }
                             case L's':
                             {
                                 vwprintf(text, args);
@@ -605,6 +646,11 @@ namespace AK
                     }
                 }
             }
+        }
+
+        Logger* Logger::get() 
+        {
+            return &Logger::logger;
         }
         
         void Logger::printLevel()
@@ -629,6 +675,9 @@ namespace AK
                 case LEVEL_FATAL:
                     printf("FATAL");
                     break;
+                case LEVEL_ASSERT:
+                    printf("ASSERT");
+                    break;
             }
         }
 
@@ -647,6 +696,9 @@ namespace AK
                 case LEVEL_ERROR:
                 case LEVEL_FATAL:
                     printColor(FORMAT_COLOR_RED);
+                    break;
+                case LEVEL_ASSERT:
+                    printColor(FORMAT_COLOR_CYAN);
                     break;
             }
         }
@@ -720,6 +772,9 @@ namespace AK
                 case LEVEL_FATAL:
                     wprintf(L"FATAL");
                     break;
+                case LEVEL_ASSERT:
+                    wprintf(L"ASSERT");
+                    break;
             }
         }
 
@@ -754,6 +809,8 @@ namespace AK
             const size_t cSize = strlen(src);
             mbstowcs(dest, src, cSize);
         }
+
+        Logger Logger::logger = Logger("[%l %d %t]: %s\n", L"[%l %d %t]: %s\n", AK::Log::LEVEL_TRACE);
 
         #if defined(PLATFORM_WINDOWS) 
         int Logger::FORMAT_COLOR_BLACK =    0x0;
