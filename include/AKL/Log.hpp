@@ -15,6 +15,43 @@
 #include <linux.h>
 #endif
 
+#define WIDEN2(x) L ## x
+#define WIDEN(x) WIDEN2(x)
+#define WFILE WIDEN(__FILE__)
+
+#define LOG_TRACE(msg) AK::Log::Logger::get()->logTrace(msg)
+#define LOG_DEBUG(msg) AK::Log::Logger::get()->logDebug(msg)
+#define LOG_INFO(msg) AK::Log::Logger::get()->logInfo(msg)
+#define LOG_WARNING(msg) AK::Log::Logger::get()->logWarning(msg)
+#define LOG_ERROR(msg) AK::Log::Logger::get()->logError(msg)
+#define LOG_FATAL(msg) AK::Log::Logger::get()->logFatal(msg)
+
+#define LOG_TRACE_ARGS(msg, ...) AK::Log::Logger::get()->logTrace(msg, __VA_ARGS__)
+#define LOG_DEBUG_ARGS(msg, ...) AK::Log::Logger::get()->logDebug(msg, __VA_ARGS__)
+#define LOG_INFO_ARGS(msg, ...) AK::Log::Logger::get()->logInfo(msg, __VA_ARGS__)
+#define LOG_WARNING_ARGS(msg, ...) AK::Log::Logger::get()->logWarning(msg, __VA_ARGS__)
+#define LOG_ERROR_ARGS(msg, ...) AK::Log::Logger::get()->logError(msg, __VA_ARGS__)
+#define LOG_FATAL_ARGS(msg, ...) AK::Log::Logger::get()->logFatal(msg, __VA_ARGS__)
+
+#define LOG_TRACE_WIDE(msg) AK::Log::Logger::get()->logTraceW(msg)
+#define LOG_DEBUG_WIDE(msg) AK::Log::Logger::get()->logDebugW(msg)
+#define LOG_INFO_WIDE(msg) AK::Log::Logger::get()->logInfoW(msg)
+#define LOG_WARNING_WIDE(msg) AK::Log::Logger::get()->logWarningW(msg)
+#define LOG_ERROR_WIDE(msg) AK::Log::Logger::get()->logErrorW(msg)
+#define LOG_FATAL_WIDE(msg) AK::Log::Logger::get()->logFatalW(msg)
+
+#define LOG_TRACE_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logTraceW(msg, __VA_ARGS__)
+#define LOG_DEBUG_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logDebugW(msg, __VA_ARGS__)
+#define LOG_INFO_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logInfoW(msg, __VA_ARGS__)
+#define LOG_WARNING_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logWarningW(msg, __VA_ARGS__)
+#define LOG_ERROR_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logErrorW(msg, __VA_ARGS__)
+#define LOG_FATAL_ARGS_WIDE(msg, ...) AK::Log::Logger::get()->logFatalW(msg, __VA_ARGS__)
+
+#define LOG_ASSERT(condition, msg) if (!(condition)) AK::Log::Logger::get()->logAssert("['%s':%d]: " msg, __FILE__, __LINE__)
+#define LOG_ASSERT_WIDE(condition, msg) if (!(condition)) AK::Log::Logger::get()->logAssertW(L"['%s':%d]: " msg, WFILE, __LINE__)
+#define LOG_ASSERT_ARGS(condition, msg, ...) if (!(condition)) AK::Log::Logger::get()->logAssert("['%s':%d]: " msg, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ASSERT_ARGS_WIDE(condition, msg, ...) if (!(condition)) AK::Log::Logger::get()->logAssertW(L"['%s':%d]: " msg, WFILE, __LINE__, __VA_ARGS__)
+
 namespace AK 
 {
     namespace Log 
@@ -26,7 +63,8 @@ namespace AK
             LEVEL_INFO,
             LEVEL_WARNING,
             LEVEL_ERROR,
-            LEVEL_FATAL
+            LEVEL_FATAL,
+            LEVEL_ASSERT
         };
 
         class Logger 
@@ -47,6 +85,7 @@ namespace AK
             void logWarning(const char* text, ...);
             void logError(const char* text, ...);
             void logFatal(const char* text, ...);
+            void logAssert(const char* text, ...);
             void setLevel(WarningLevel _level);
             void printFmt(const char* fmt, const char* text, ...);
             void printFmtArgs(const char* fmt, const char* text, va_list args);
@@ -61,9 +100,11 @@ namespace AK
             void logWarningW(const wchar_t* text, ...);
             void logErrorW(const wchar_t* text, ...);
             void logFatalW(const wchar_t* text, ...);
+            void logAssertW(const wchar_t* text, ...);
             void setLevelW(WarningLevel _level);
             void printFmtW(const wchar_t* fmt, const wchar_t* text, ...);
             void printFmtArgsW(const wchar_t* fmt, const wchar_t* text, va_list args);
+            static Logger* get();
         private:
             void printLevel();
             void printLevelColor();
@@ -86,6 +127,8 @@ namespace AK
             char currentDate[11];
             wchar_t currentTimeW[10];
             wchar_t currentDateW[11];
+
+            static Logger logger;
 
             #if defined(PLATFORM_WINDOWS)
 
